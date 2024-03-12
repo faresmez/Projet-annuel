@@ -36,6 +36,17 @@ const DessinCanvas = () => {
     setIsCanvasEmpty(dataVierge === '{"lines":[],"width":400,"height":400}');
   };
 
+
+/*   const SauverImage = (imageData) => {
+    const blob = new Blob([imageData], { type: 'image/png' });
+    const imageURL = window.URL.createObjectURL(blob);
+
+    const downloadLink = document.createElement('a');
+    downloadLink.href = imageURL;
+    downloadLink.download = 'image.png';
+    downloadLink.click();
+}; */
+ 
   const handleClose = () => {setShowModal(false); refaireDessin(); };
 
   return (
@@ -51,7 +62,7 @@ const DessinCanvas = () => {
         />
       </div>
       <div className="mt-3">
-        <Button onClick={envoyerDessin} disabled={isCanvasEmpty} variant="primary">Classifier</Button>
+      <Button onClick={() => { envoyerDessin(); /* SauverImage(); */ }} disabled={isCanvasEmpty} variant="primary">Classifier</Button>
         {' '}
         <Button onClick={refaireDessin} variant="secondary">Refaire</Button>
       </div>
@@ -62,9 +73,7 @@ const DessinCanvas = () => {
         </Modal.Header>
         <Modal.Body>{prediction}</Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
-            Fermer
-          </Button>
+          <Button variant="secondary" onClick={handleClose}>Fermer</Button>
         </Modal.Footer>
       </Modal>
     </div>
