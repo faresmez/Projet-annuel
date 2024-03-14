@@ -11,11 +11,14 @@ const DessinCanvas = () => {
   const [prediction, setPrediction] = useState("");
   const [isCanvasEmpty, setIsCanvasEmpty] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  let image;
 
   const canvasImageToJSON = (canvas) => {
     const context = canvas.getContext("2d");
     const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
     const pixels = imageData.data;
+    image = imageData;
+    console.log(canvas);
 
     const pixelJSON = {};
     for (let i = 0; i < pixels.length; i += 4) {
@@ -33,13 +36,23 @@ const DessinCanvas = () => {
     const model = await tf.loadLayersModel(
       "http://localhost:4000/model/model.json"
     );
-    console.log(canvas);
-    const output = model.predict(tf.FromPixels(canvas));
-    console.log(output);
-    pixelJSON["result"] = output;
+    console.log(model);
+    const resizedImage = tf.image.resizeBilinear(
+      tf.browser.fromPixels(image),
+      [28, 28]
+    );
+    const grayscaleImage = resizedImage.mean(2).expandDims(-1);
+    const output = model.predict(grayscaleImage.reshape([1, 28, 28, 1]));
+    const result = output.dataSync();
+    console.log(result);
+    console.log(pixelJSON);
+    //pixelJSON["result"] = output;
 
     try {
-      const response = await axios.post("url-server", { image: pixelJSON });
+      const response = await axios.post(
+        "http://localhost:4000/numbers/",
+        pixelJSON
+      );
       setPrediction(response.data.prediction);
       setShowModal(true);
     } catch (error) {

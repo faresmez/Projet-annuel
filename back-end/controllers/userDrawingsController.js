@@ -4,6 +4,7 @@ const path = require("path");
 // ajt
 exports.createNumber = async (req, res) => {
   try {
+    console.log(req.body);
     const newNumber = new Numbers(req.body);
 
     await newNumber.save();
