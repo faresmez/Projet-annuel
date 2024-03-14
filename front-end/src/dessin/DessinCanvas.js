@@ -1,18 +1,19 @@
-import React, { useRef, useState } from 'react';
-import CanvasDraw from 'react-canvas-draw';
-import axios from 'axios';
-import Button from 'react-bootstrap/Button';
-import Modal from 'react-bootstrap/Modal';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import React, { useRef, useState } from "react";
+import CanvasDraw from "react-canvas-draw";
+import axios from "axios";
+import Button from "react-bootstrap/Button";
+import Modal from "react-bootstrap/Modal";
+import "bootstrap/dist/css/bootstrap.min.css";
+import * as tf from "@tensorflow/tfjs";
 
 const DessinCanvas = () => {
   const canvasRef = useRef(null);
-  const [prediction, setPrediction] = useState('');
+  const [prediction, setPrediction] = useState("");
   const [isCanvasEmpty, setIsCanvasEmpty] = useState(true);
   const [showModal, setShowModal] = useState(false);
 
   const canvasImageToJSON = (canvas) => {
-    const context = canvas.getContext('2d');
+    const context = canvas.getContext("2d");
     const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
     const pixels = imageData.data;
 
@@ -29,9 +30,16 @@ const DessinCanvas = () => {
   const envoyerDessin = async () => {
     const canvas = canvasRef.current.canvasContainer.childNodes[0];
     const pixelJSON = canvasImageToJSON(canvas);
+    const model = await tf.loadLayersModel(
+      "http://localhost:4000/model/model.json"
+    );
+    console.log(canvas);
+    const output = model.predict(tf.FromPixels(canvas));
+    console.log(output);
+    pixelJSON["result"] = output;
 
     try {
-      const response = await axios.post('url-server', { image: pixelJSON });
+      const response = await axios.post("url-server", { image: pixelJSON });
       setPrediction(response.data.prediction);
       setShowModal(true);
     } catch (error) {
@@ -43,7 +51,7 @@ const DessinCanvas = () => {
 
   const refaireDessin = () => {
     canvasRef.current.clear();
-    setPrediction('');
+    setPrediction("");
     setIsCanvasEmpty(true);
     setShowModal(false);
   };
@@ -59,27 +67,45 @@ const DessinCanvas = () => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh'}} className="container mt-3">
-      <div style={{ border: '2px solid #000', padding: '10px', }}>
-        <CanvasDraw 
-          ref={canvasRef} 
-          brushRadius={1} 
-          lazyRadius={0} 
-          canvasWidth={400} 
-          canvasHeight={400} 
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        height: "100vh",
+      }}
+      className="container mt-3">
+      <div style={{ border: "2px solid #000", padding: "10px" }}>
+        <CanvasDraw
+          ref={canvasRef}
+          brushRadius={1}
+          lazyRadius={0}
+          canvasWidth={400}
+          canvasHeight={400}
           onChange={verifierSiCanvasEstVide}
         />
       </div>
       <div className="mt-3">
-        <Button onClick={envoyerDessin} disabled={isCanvasEmpty} variant="primary">Classifier</Button>
-        {' '}
-        <Button onClick={refaireDessin} variant="secondary">Refaire</Button>
+        <Button
+          onClick={envoyerDessin}
+          disabled={isCanvasEmpty}
+          variant="primary">
+          Classifier
+        </Button>{" "}
+        <Button onClick={refaireDessin} variant="secondary">
+          Refaire
+        </Button>
       </div>
       <Modal show={showModal} onHide={handleClose}>
-        <Modal.Header closeButton><Modal.Title>Résultat de la prédiction</Modal.Title></Modal.Header>
+        <Modal.Header closeButton>
+          <Modal.Title>Résultat de la prédiction</Modal.Title>
+        </Modal.Header>
         <Modal.Body>{prediction}</Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>Fermer</Button>
+          <Button variant="secondary" onClick={handleClose}>
+            Fermer
+          </Button>
         </Modal.Footer>
       </Modal>
     </div>
@@ -87,11 +113,6 @@ const DessinCanvas = () => {
 };
 
 export default DessinCanvas;
-
-
-
-
-
 
 /*     const  envoyerDessin = async () => {
     const image = canvasRef.current.getSaveData();
@@ -104,7 +125,7 @@ export default DessinCanvas;
       setPrediction("Erreur lors de la classification.");
       setShowModal(true);
     }
-  }; */ 
+  }; */
 
 /*     const getPixelData = (canvas) => {
     const context = canvas.getContext('2d');

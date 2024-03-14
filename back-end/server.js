@@ -18,6 +18,7 @@ app.use((req, res, next) => {
 
 // routes
 app.use("/numbers", numbersRoutes);
+app.use("/model", express.static("trained_model_js_2"));
 
 // connect to db
 mongoose

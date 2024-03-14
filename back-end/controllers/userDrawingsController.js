@@ -1,10 +1,11 @@
 const Numbers = require("../models/userDrawings");
+const path = require("path");
 
 // ajt
 exports.createNumber = async (req, res) => {
   try {
     const newNumber = new Numbers(req.body);
-    console.log(req.body);
+
     await newNumber.save();
     res.status(201).json(newNumber);
   } catch (error) {
