@@ -12,14 +12,16 @@ const DessinCanvas = () => {
   const [showModal, setShowModal] = useState(false);
 
   const preprocessCanvasImage = async (canvas) => {
-    const tensor = tf.browser.fromPixels(canvas)
-      .resizeBilinear([28, 28]) // Redimensionnement à 28x28 pixels
-      .mean(2) // Conversion en niveaux de gris en faisant la moyenne sur les canaux RGB
-      .expandDims(2) // Ajout d'une dimension pour les canaux (devenant en niveaux de gris)
-      .expandDims() // Ajout d'une dimension pour le batch
-      .toFloat() // S'assurer que les données sont en float
-      .div(tf.scalar(255.0)); // Normalisation des pixels
-    
+    // Step 1: Convert canvas to tensor and resize using nearest neighbor to preserve details
+    let tensor = tf.browser
+      .fromPixels(canvas)
+      .resizeNearestNeighbor([28, 28]) // Use nearest neighbor resizing to preserve edges
+      .mean(2) // Convert to grayscale by averaging RGB channels
+      .expandDims(2) // Add a dimension for the channels (now in grayscale)
+      .toFloat() // Convert to float
+      .div(tf.scalar(255.0)); // Normalize the pixel values to [0, 1]
+
+    tensor = tensor.expandDims();
     return tensor;
   };
 
@@ -27,14 +29,22 @@ const DessinCanvas = () => {
     const canvas = canvasRef.current.canvasContainer.childNodes[1];
     if (!canvas) return;
     const tensorImage = await preprocessCanvasImage(canvas);
-    console.log(tensorImage.shape)
-    const model = await tf.loadLayersModel("http://localhost:4000/model/model.json");
+    console.log(tensorImage);
+    const model = await tf.loadLayersModel(
+      "http://localhost:4000/model/model.json"
+    );
 
-    const prediction = model.predict(tensorImage);
-    const predictedIndex = prediction.argMax(1).dataSync()[0];
-
-    setPrediction(`Prédiction : ${predictedIndex}`);
-    setShowModal(true);
+    model
+      .predict(tensorImage)
+      .data()
+      .then((predictionArray) => {
+        console.log(predictionArray);
+        const predictedIndex = predictionArray.indexOf(
+          Math.max(...predictionArray)
+        );
+        setPrediction(`Prédiction : ${predictedIndex}`);
+        setShowModal(true);
+      });
   };
 
   const refaireDessin = () => {
@@ -63,8 +73,9 @@ const DessinCanvas = () => {
       className="container mt-3">
       <div style={{ border: "2px solid #000", padding: "10px" }}>
         <CanvasDraw
+          id="test"
           ref={canvasRef}
-          brushRadius={1}
+          brushRadius={10}
           lazyRadius={0}
           canvasWidth={400}
           canvasHeight={400}
@@ -98,7 +109,6 @@ const DessinCanvas = () => {
 };
 
 export default DessinCanvas;
-
 
 /* import React, { useRef, useState } from "react";
 import CanvasDraw from "react-canvas-draw";
