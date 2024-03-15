@@ -4,17 +4,23 @@ const path = require("path");
 // ajt
 exports.createNumber = async (req, res) => {
   try {
-    console.log(req.body);
-    const newNumber = new Numbers(req.body);
+    if (!req.body.pixels || req.body.pixels.length === 0 || !req.body.resultat) {
+      return res.status(400).json({ error: "Invalid drawing data or missing result provided." });
+    }
 
+    const newNumber = new Numbers({
+      pixels: req.body.pixels,
+      resultat: req.body.resultat
+    });
     await newNumber.save();
     res.status(201).json(newNumber);
   } catch (error) {
-    res
-      .status(500)
-      .json({ error: "Erreur lors de la création du dessin utilisateur" });
+    res.status(500).json({ error: "Erreur lors de la création du dessin utilisateur" });
   }
 };
+
+
+
 
 exports.getAllNumbers = async (req, res) => {
   try {
