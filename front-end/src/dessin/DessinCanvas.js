@@ -75,7 +75,7 @@ const DessinCanvas = () => {
         <CanvasDraw
           id="test"
           ref={canvasRef}
-          brushRadius={10}
+          brushRadius={13}
           lazyRadius={0}
           canvasWidth={400}
           canvasHeight={400}
