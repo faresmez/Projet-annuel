@@ -45,7 +45,6 @@ const DessinCanvas = () => {
     const output = model.predict(grayscaleImage.reshape([1, 28, 28, 1]));
     const result = output.dataSync();
     console.log(result);
-    console.log(pixelJSON);
     //pixelJSON["result"] = output;
 
     try {
