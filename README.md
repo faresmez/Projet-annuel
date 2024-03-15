@@ -22,4 +22,5 @@ Pour mettre en place le projet sur votre machine locale, suivez ces étapes :
 Clonez le dépôt sur votre machine :
 
    git clone https://github.com/faresmez/Projet-annuel.git
+   
    cd Projet-annuel
